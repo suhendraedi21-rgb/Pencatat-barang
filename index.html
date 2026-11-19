@@ -1,0 +1,387 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pencatat Barang</title>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#101827">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+header h2 {
+  margin: 0;
+}
+
+header p {
+  color: #9ca3af;
+  margin: 6px 0;
+}
+
+.search {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  background: #1f2937;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.categories button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #263449;
+  color: white;
+  white-space: nowrap;
+}
+
+.categories button.active {
+  background: #2563eb;
+}
+
+h3 {
+  margin-top: 24px;
+}
+
+.product {
+  background: #1f2937;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product p {
+  color: #9ca3af;
+  margin: 6px 0 0;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+}
+  .product button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+
+
+
+
+
+
+
+
+.add-form {
+  background: #1f2937;
+  padding: 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+  .add-form input,
+.add-form select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  margin-top: 10px;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  background: #1f2937;
+  color: white;
+  font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h2>🗓️ Pencatat Barang</h2>
+    <p>catatan nama barang dan harga</p>
+  </div>
+  
+</header>
+
+<input
+  class="search"
+  id="search"
+  placeholder="🔍 Cari nama barang..."
+>
+
+<div class="categories">
+  <button class="active" onclick="filter('Semua', this)">Semua</button>
+  <button onclick="filter('Minuman', this)">🥤 Minuman</button>
+  <button onclick="filter('Rokok', this)">🚬 Rokok</button>
+  <button onclick="filter('Mie', this)">🍜 Mie</button>
+  <button onclick="filter('Kopi', this)">☕ Kopi</button>
+  <button onclick="filter('Sembako', this)">🌾 Sembako</button>
+<button onclick="filter('Kebutuhan Harian', this)">🧴 Kebutuhan Harian</button>
+<button onclick="filter('Makanan', this)">🍪 Makanan</button>
+<button onclick="filter('Lainnya', this)">📦 Lainnya</button>
+</div>
+
+
+<div class="add-form">
+  <h3>➕ Tambah Barang</h3>
+
+  <input
+    class="cash"
+    id="newName"
+    type="text"
+    placeholder="Nama barang..."
+  >
+
+  <input
+    class="cash"
+    id="newPrice"
+    type="number"
+    placeholder="Harga barang..."
+  >
+
+  
+  <select class="cash" id="newCategory">
+    <option value="Minuman">Minuman</option>
+    <option value="Rokok">Rokok</option>
+    <option value="Mie">Mie</option>
+    <option value="Kopi">Kopi</option>
+    <option value="Sembako">Sembako</option>
+  <option value="Kebutuhan Harian">Kebutuhan Harian</option>
+<option value="Makanan">Makanan</option>
+<option value="Lainnya">Lainnya</option>
+  </select>
+
+  <button class="save-btn" onclick="addProduct()">
+    Simpan Barang
+  </>
+</div>
+
+  <h3>Daftar Barang</h3>
+<div id="products"></div>
+
+
+
+<script>
+let products = JSON.parse(localStorage.getItem("warungProducts")) || [];
+
+let selectedCategory = "Semua";
+
+
+const rupiah = number =>
+  "Rp" + number.toLocaleString("id-ID");
+
+function filter(category, button) {
+  selectedCategory = category;
+
+  document.querySelectorAll(".categories button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  button.classList.add("active");
+  renderProducts();
+}
+
+
+function addProduct() {
+  const name = document.getElementById("newName").value.trim();
+  const price = Number(document.getElementById("newPrice").value);
+  const category = document.getElementById("newCategory").value;
+
+  if (!name || price <= 0 || !Number.isFinite(price)) {
+    alert("Masukkan nama dan harga barang yang benar!");
+    return;
+  }
+
+  products.push({
+    id: String(Date.now()),
+    name: name,
+    price: price,
+    category: category
+  });
+  localStorage.setItem("warungProducts", JSON.stringify(products));
+
+  document.getElementById("newName").value = "";
+  document.getElementById("newPrice").value = "";
+  
+  renderProducts();
+
+  alert("Barang berhasil ditambahkan!");
+}
+
+  function renderProducts() {
+  const keyword = document
+    .getElementById("search").value.toLowerCase();
+
+  const filtered = products.filter(item =>
+    (selectedCategory === "Semua" ||
+     item.category === selectedCategory) &&
+    item.name.toLowerCase().includes(keyword)
+  );
+
+  document.getElementById("products").innerHTML =
+    filtered.length
+      ? filtered.map((item, index) => `
+        <div class="product">
+          <div>
+            <strong>${item.name}</strong>
+            <p>${rupiah(item.price)}</p> 
+          </div>
+          <div>
+  
+
+  <button onclick="editProduct('${item.id}')">
+    Edit
+  </button>
+
+  <button onclick="deleteProduct('${item.id}')">
+    Hapus
+  </button>
+</div>
+        </div>
+      `).join("")
+      : "<p>Barang belum tersedia.</p>";
+}
+
+
+function editProduct(id) {
+  const item = products.find(p => p.id === id);
+  if (!item) return;
+
+  const newName = prompt("Nama barang:", item.name);
+  if (newName === null || !newName.trim()) return;
+
+  const newPrice = prompt("Harga baru:", item.price);
+  if (newPrice === null) return;
+
+  const price = Number(newPrice);
+
+  if (!Number.isFinite(price) || price <= 0) {
+    alert("Harga tidak valid!");
+    return;
+  }
+
+  item.name = newName.trim();
+  item.price = price;
+
+  localStorage.setItem(
+    "warungProducts",
+    JSON.stringify(products)
+  );
+
+  renderProducts();
+  alert("Barang berhasil diperbarui!");
+}
+
+function deleteProduct(id) {
+  const item = products.find(p => p.id === id);
+  if (!item) return;
+
+  if (!confirm("Hapus " + item.name + "?")) return;
+
+  products = products.filter(p => p.id !== id);
+  
+
+  localStorage.setItem(
+    "warungProducts",
+    JSON.stringify(products)
+  );
+
+  renderProducts();
+
+  alert("Barang berhasil dihapus!");
+}
+
+  
+document.getElementById("search")
+  .addEventListener("input", renderProducts);
+
+
+
+
+renderProducts();
+function backupData() {
+  const data = localStorage.getItem("warungProducts") || "[]";
+
+  navigator.clipboard.writeText(data)
+    .then(() => {
+      alert("Backup berhasil disalin! Simpan di aplikasi Catatan.");
+    })
+    .catch(() => {
+      alert("Gagal menyalin backup. Coba lagi.");
+    });
+}
+function restoreData() {
+  const data = prompt("Tempel data backup di sini:");
+
+  if (!data) return;
+
+  try {
+    const items = JSON.parse(data);
+
+    if (!Array.isArray(items)) {
+      throw new Error("Format salah");
+    }
+
+    localStorage.setItem(
+      "warungProducts",
+      JSON.stringify(items)
+    );
+
+    alert("Data berhasil dipulihkan!");
+    location.reload();
+
+  } catch (error) {
+    alert("Backup tidak valid!");
+  }
+}
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
+}
+</script>
+
+<button onclick="restoreData()">♻️ Pulihkan Data</button>
+  <button onclick="backupData()">💾 Backup Data</button>
+</body>
+</html>

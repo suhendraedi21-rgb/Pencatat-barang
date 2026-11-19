@@ -1,0 +1,10 @@
+{
+  "name": "Pencatat Barang",
+  "short_name": "Pencatat",
+  "description": "Catatan nama barang dan harga",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#101827",
+  "theme_color": "#101827",
+  "orientation": "portrait"
+}
